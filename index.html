@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GGHSS Mardan Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: url('https://www.geo.tv/assets/uploads/updates/2020-11-12/318127_5012887_updates.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 50px auto;
+      background: #f1f8e9;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #00796b;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #e0f2f1;
+    }
+
+    button {
+      padding: 12px 20px;
+      background-color: #00796b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button:hover {
+      background-color: #004d40;
+    }
+
+    .login-form, .dashboard {
+      display: none;
+    }
+
+    .active {
+      display: block;
+    }
+
+    .role-section {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .record-box {
+      background: #e0f2f1;
+      border-left: 5px solid #00796b;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Government Girls Higher Secondary School No.1 Mardan</h1>
+
+    <div id="loginForm" class="login-form active">
+      <h2>Login to Portal</h2>
+      <select id="role">
+        <option value="student">Student</option>
+        <option value="teacher">Teacher</option>
+        <option value="principal">Principal</option>
+        <option value="staff">Other Staff</option>
+      </select>
+      <input type="text" id="userId" placeholder="Enter your ID" />
+      <input type="password" id="password" placeholder="Enter your password" />
+      <button onclick="login()">Login</button>
+    </div>
+
+    <div id="dashboard" class="dashboard">
+      <h2 id="dashboardTitle"></h2>
+
+      <div id="studentSection" class="role-section">
+        <h3>📘 Student Portal</h3>
+        <textarea placeholder="Write your feedback or idea..."></textarea>
+        <button onclick="alert('Idea Submitted!')">Submit</button>
+      </div>
+
+      <div id="teacherSection" class="role-section">
+        <h3>📚 Teacher Portal</h3>
+        <textarea placeholder="Enter student performance record..."></textarea>
+        <button onclick="alert('Record Uploaded!')">Upload Record</button>
+        <div class="record-box">📄 English - A Grade</div>
+        <div class="record-box">📄 Math - B+ Grade</div>
+      </div>
+
+      <div id="principalSection" class="role-section">
+        <h3>📂 Principal Dashboard</h3>
+        <button onclick="alert('All records opened')">View Records</button>
+        <button onclick="alert('Announcement sent')">Send Announcement</button>
+      </div>
+
+      <div id="staffSection" class="role-section">
+        <h3>🗂 Staff Portal</h3>
+        <textarea placeholder="Enter duty report..."></textarea>
+        <button onclick="alert('Report Submitted!')">Submit</button>
+      </div>
+
+      <button onclick="logout()">🔒 Logout</button>
+    </div>
+  </div>
+
+  <script>
+    const users = {
+      student: { id: 's1', password: 'student' },
+      teacher: { id: 't1', password: 'teacher' },
+      principal: { id: 'p1', password: 'principal' },
+      staff: { id: 'sf1', password: 'staff' }
+    };
+
+    function login() {
+      const role = document.getElementById('role').value;
+      const id = document.getElementById('userId').value;
+      const pass = document.getElementById('password').value;
+
+      if (users[role] && users[role].id === id && users[role].password === pass) {
+        document.getElementById('loginForm').classList.remove('active');
+        document.getElementById('dashboard').classList.add('active');
+        document.getElementById('dashboardTitle').innerText = role.toUpperCase() + ' DASHBOARD';
+
+        document.getElementById('studentSection').style.display = (role === 'student') ? 'block' : 'none';
+        document.getElementById('teacherSection').style.display = (role === 'teacher') ? 'block' : 'none';
+        document.getElementById('principalSection').style.display = (role === 'principal') ? 'block' : 'none';
+        document.getElementById('staffSection').style.display = (role === 'staff') ? 'block' : 'none';
+      } else {
+        alert('❌ Invalid ID or Password');
+      }
+    }
+
+    function logout() {
+      document.getElementById('dashboard').classList.remove('active');
+      document.getElementById('loginForm').classList.add('active');
+      document.getElementById('userId').value = '';
+      document.getElementById('password').value = '';
+    }
+  </script>
+</body>
+</html>
