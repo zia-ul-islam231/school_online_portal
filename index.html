@@ -90,8 +90,6 @@
     <h2>Sign Up</h2>
     <select id="signupRole">
       <option value="student">Student</option>
-      <option value="teacher">Teacher</option>
-      <option value="principal">Principal</option>
       <option value="staff">Staff</option>
     </select>
     <input type="text" id="signupId" placeholder="Create ID" />
@@ -117,15 +115,6 @@
       <button onclick="uploadRecord()">Upload Record</button>
       <h4>Records:</h4>
       <div id="recordList"></div>
-      <h4>Make Announcement</h4>
-      <textarea id="teacherAnnText" placeholder="Enter announcement"></textarea>
-      <select id="teacherAnnTarget">
-        <option value="student">To Students</option>
-        <option value="teacher">To Teachers</option>
-        <option value="principal">To Principal</option>
-        <option value="staff">To Staff</option>
-      </select>
-      <button onclick="postAnnouncement()">Announce</button>
     </div>
 
     <div id="principalSection" class="role-section">
@@ -137,6 +126,16 @@
         <option value="staff">To Staff</option>
       </select>
       <button onclick="postAnnouncement(true)">Send Announcement</button>
+
+      <h4>Manage Users</h4>
+      <input id="deleteUserIdP" placeholder="User ID to delete" />
+      <select id="deleteUserRoleP">
+        <option value="student">Student</option>
+        <option value="teacher">Teacher</option>
+        <option value="staff">Staff</option>
+        <option value="principal">Principal</option>
+      </select>
+      <button onclick="deleteUser(true)">Delete User</button>
     </div>
 
     <div id="staffSection" class="role-section">
@@ -150,12 +149,10 @@
 </div>
 
 <script>
-  let users = JSON.parse(localStorage.getItem('users')) || {
-    student: [], teacher: [], principal: [], staff: []
-  };
+  let users = JSON.parse(localStorage.getItem('users')) || { student: [], teacher: [], principal: [], staff: [] };
   let records = JSON.parse(localStorage.getItem('records')) || [];
   let announcements = JSON.parse(localStorage.getItem('announcements')) || [];
-  let currentRole = '';
+  let currentRole = '', currentId = '';
 
   function saveAll() {
     localStorage.setItem('users', JSON.stringify(users));
@@ -178,7 +175,7 @@
     const id = document.getElementById('loginId').value;
     const pass = document.getElementById('loginPassword').value;
     if (users[role].some(u => u.id === id && u.password === pass)) {
-      currentRole = role;
+      currentRole = role; currentId = id;
       document.getElementById('loginForm').classList.remove('active');
       document.getElementById('dashboard').classList.add('active');
       document.getElementById('dashboardTitle').innerText = role.toUpperCase() + ' DASHBOARD';
@@ -220,21 +217,38 @@
   }
 
   function postAnnouncement(fromPrincipal = false) {
-    const text = fromPrincipal ? document.getElementById('principalAnnText').value : document.getElementById('teacherAnnText').value;
-    const target = fromPrincipal ? document.getElementById('principalAnnTarget').value : document.getElementById('teacherAnnTarget').value;
+    const text = fromPrincipal ? document.getElementById('principalAnnText').value : '';
+    const target = fromPrincipal ? document.getElementById('principalAnnTarget').value : '';
     if (!text) return alert('Write something');
-    announcements.push({ text, to: target });
+    announcements.push({ text, to: target, by: currentId });
     saveAll(); displayAnnouncements(); alert('Announcement sent');
   }
 
   function displayAnnouncements() {
     const filtered = announcements.filter(a => a.to === currentRole);
-    const html = filtered.map(a => `<div class='announcement-box'>📢 ${a.text}</div>`).join('');
+    const html = filtered.map((a, i) => {
+      let delBtn = (currentRole === 'principal') ? `<button onclick="deleteAnnouncement(${i})">❌</button>` : '';
+      return `<div class='announcement-box'>📢 ${a.text} ${delBtn}</div>`;
+    }).join('');
     if (currentRole === 'student') document.getElementById('studentAnnouncements').innerHTML = html;
     if (currentRole === 'staff') document.getElementById('staffAnnouncements').innerHTML = html;
+  }
+
+  function deleteAnnouncement(index) {
+    announcements.splice(index, 1);
+    saveAll(); displayAnnouncements();
+  }
+
+  function deleteUser(fromPrincipal = false) {
+    const id = fromPrincipal ? document.getElementById('deleteUserIdP').value : '';
+    const role = fromPrincipal ? document.getElementById('deleteUserRoleP').value : '';
+    users[role] = users[role].filter(user => user.id !== id);
+    saveAll();
+    alert('User deleted successfully');
   }
 </script>
 </body>
 </html>
+
 
 
