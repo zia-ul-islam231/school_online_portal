@@ -114,10 +114,12 @@
 
       <div id="teacherSection" class="role-section">
         <h3>📚 Teacher Portal</h3>
-        <textarea placeholder="Enter student performance record..."></textarea>
-        <button onclick="alert('Record Uploaded!')">Upload Record</button>
-        <div class="record-box">📄 English - A Grade</div>
-        <div class="record-box">📄 Math - B+ Grade</div>
+        <input type="text" id="studentName" placeholder="Student Name" />
+        <input type="text" id="studentSubject" placeholder="Subject (e.g. Math)" />
+        <input type="text" id="studentGrade" placeholder="Grade (e.g. A+)" />
+        <button onclick="uploadRecord()">Upload Record</button>
+        <h4>📄 Uploaded Student Records:</h4>
+        <div id="recordList"></div>
       </div>
 
       <div id="principalSection" class="role-section">
@@ -137,13 +139,16 @@
   </div>
 
   <script>
-    // Simulated file handling using localStorage
+    // Simulated users storage
     let users = JSON.parse(localStorage.getItem('schoolUsers')) || {
       student: [],
       teacher: [],
       principal: [],
       staff: []
     };
+
+    // Simulated teacher "file" to hold student records
+    let teacherRecords = JSON.parse(localStorage.getItem('teacherRecords')) || [];
 
     function saveUsers() {
       localStorage.setItem('schoolUsers', JSON.stringify(users));
@@ -184,6 +189,10 @@
         document.getElementById('teacherSection').style.display = (role === 'teacher') ? 'block' : 'none';
         document.getElementById('principalSection').style.display = (role === 'principal') ? 'block' : 'none';
         document.getElementById('staffSection').style.display = (role === 'staff') ? 'block' : 'none';
+
+        if (role === 'teacher') {
+          displayRecords();
+        }
       } else {
         alert('❌ Invalid ID or Password');
       }
@@ -205,6 +214,41 @@
         document.getElementById('loginForm').classList.add('active');
       }
     }
+
+    function uploadRecord() {
+      const name = document.getElementById('studentName').value.trim();
+      const subject = document.getElementById('studentSubject').value.trim();
+      const grade = document.getElementById('studentGrade').value.trim();
+
+      if (name && subject && grade) {
+        const record = { name, subject, grade };
+        teacherRecords.push(record);
+        localStorage.setItem('teacherRecords', JSON.stringify(teacherRecords));
+        alert('✅ Record Uploaded!');
+        document.getElementById('studentName').value = '';
+        document.getElementById('studentSubject').value = '';
+        document.getElementById('studentGrade').value = '';
+        displayRecords();
+      } else {
+        alert('❌ Please fill all fields.');
+      }
+    }
+
+    function displayRecords() {
+      const container = document.getElementById('recordList');
+      container.innerHTML = '';
+      if (teacherRecords.length === 0) {
+        container.innerHTML = "<p>No records uploaded yet.</p>";
+        return;
+      }
+      teacherRecords.forEach((rec) => {
+        const div = document.createElement('div');
+        div.className = 'record-box';
+        div.textContent = `👩‍🎓 ${rec.name} — ${rec.subject}: ${rec.grade}`;
+        container.appendChild(div);
+      });
+    }
   </script>
 </body>
 </html>
+
