@@ -158,7 +158,13 @@
 </div>
 
 <script>
-  let users = JSON.parse(localStorage.getItem('users')) || { student: [], teacher: [], principal: [], staff: [] };
+  let users = JSON.parse(localStorage.getItem('users')) || {
+    student: [],
+    teacher: [],
+    principal: [{ id: "adminPrincipal", password: "12345" }],
+    staff: []
+  };
+
   let records = JSON.parse(localStorage.getItem('records')) || [];
   let announcements = JSON.parse(localStorage.getItem('announcements')) || [];
   let currentRole = '', currentId = '';
