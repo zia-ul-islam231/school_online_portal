@@ -6,10 +6,7 @@
   <title>GGHSS Mardan Portal</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
@@ -17,7 +14,6 @@
       background-size: cover;
       color: #333;
     }
-
     .container {
       max-width: 900px;
       margin: 50px auto;
@@ -26,43 +22,26 @@
       border-radius: 12px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.2);
     }
-
-    h1, h2 {
-      text-align: center;
-      color: #00796b;
-    }
+    h1, h2 { text-align: center; color: #00796b; }
 
     input, select, textarea {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+      width: 100%; padding: 12px; margin: 10px 0 20px 0;
+      border: 1px solid #ccc; border-radius: 8px;
       background-color: #e0f2f1;
     }
 
     button {
       padding: 12px 20px;
       background-color: #00796b;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
+      color: white; border: none; border-radius: 8px;
+      cursor: pointer; font-weight: 600;
+      transition: 0.3s ease;
     }
 
-    button:hover {
-      background-color: #004d40;
-    }
+    button:hover { background-color: #004d40; }
 
-    .login-form, .dashboard {
-      display: none;
-    }
-
-    .active {
-      display: block;
-    }
+    .login-form, .signup-form, .dashboard { display: none; }
+    .active { display: block; }
 
     .role-section {
       background: #ffffff;
@@ -78,25 +57,52 @@
       margin-bottom: 10px;
       border-radius: 5px;
     }
+
+    .link-btn {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #004d40;
+      cursor: pointer;
+      text-decoration: underline;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Government Girls Higher Secondary School No.1 Mardan</h1>
 
+    <!-- Login Form -->
     <div id="loginForm" class="login-form active">
       <h2>Login to Portal</h2>
-      <select id="role">
+      <select id="loginRole">
         <option value="student">Student</option>
         <option value="teacher">Teacher</option>
         <option value="principal">Principal</option>
         <option value="staff">Other Staff</option>
       </select>
-      <input type="text" id="userId" placeholder="Enter your ID" />
-      <input type="password" id="password" placeholder="Enter your password" />
+      <input type="text" id="loginId" placeholder="Enter your ID" />
+      <input type="password" id="loginPassword" placeholder="Enter your password" />
       <button onclick="login()">Login</button>
+      <div class="link-btn" onclick="toggleForms('signup')">Don't have an account? Sign up</div>
     </div>
 
+    <!-- Signup Form -->
+    <div id="signupForm" class="signup-form">
+      <h2>Sign Up</h2>
+      <select id="signupRole">
+        <option value="student">Student</option>
+        <option value="teacher">Teacher</option>
+        <option value="principal">Principal</option>
+        <option value="staff">Other Staff</option>
+      </select>
+      <input type="text" id="signupId" placeholder="Create your ID" />
+      <input type="password" id="signupPassword" placeholder="Create your password" />
+      <button onclick="signup()">Sign Up</button>
+      <div class="link-btn" onclick="toggleForms('login')">Already have an account? Login</div>
+    </div>
+
+    <!-- Dashboard -->
     <div id="dashboard" class="dashboard">
       <h2 id="dashboardTitle"></h2>
 
@@ -131,19 +137,45 @@
   </div>
 
   <script>
-    const users = {
-      student: { id: 's1', password: 'student' },
-      teacher: { id: 't1', password: 'teacher' },
-      principal: { id: 'p1', password: 'principal' },
-      staff: { id: 'sf1', password: 'staff' }
+    // Simulated file handling using localStorage
+    let users = JSON.parse(localStorage.getItem('schoolUsers')) || {
+      student: [],
+      teacher: [],
+      principal: [],
+      staff: []
     };
 
-    function login() {
-      const role = document.getElementById('role').value;
-      const id = document.getElementById('userId').value;
-      const pass = document.getElementById('password').value;
+    function saveUsers() {
+      localStorage.setItem('schoolUsers', JSON.stringify(users));
+    }
 
-      if (users[role] && users[role].id === id && users[role].password === pass) {
+    function signup() {
+      const role = document.getElementById('signupRole').value;
+      const id = document.getElementById('signupId').value;
+      const pass = document.getElementById('signupPassword').value;
+
+      if (id && pass) {
+        const exists = users[role].some(user => user.id === id);
+        if (exists) {
+          alert('❌ User ID already exists!');
+          return;
+        }
+        users[role].push({ id, password: pass });
+        saveUsers();
+        alert('✅ Sign up successful! You can now login.');
+        toggleForms('login');
+      } else {
+        alert('Please fill all fields.');
+      }
+    }
+
+    function login() {
+      const role = document.getElementById('loginRole').value;
+      const id = document.getElementById('loginId').value;
+      const pass = document.getElementById('loginPassword').value;
+
+      const valid = users[role].some(user => user.id === id && user.password === pass);
+      if (valid) {
         document.getElementById('loginForm').classList.remove('active');
         document.getElementById('dashboard').classList.add('active');
         document.getElementById('dashboardTitle').innerText = role.toUpperCase() + ' DASHBOARD';
@@ -160,8 +192,18 @@
     function logout() {
       document.getElementById('dashboard').classList.remove('active');
       document.getElementById('loginForm').classList.add('active');
-      document.getElementById('userId').value = '';
-      document.getElementById('password').value = '';
+      document.getElementById('loginId').value = '';
+      document.getElementById('loginPassword').value = '';
+    }
+
+    function toggleForms(form) {
+      if (form === 'signup') {
+        document.getElementById('loginForm').classList.remove('active');
+        document.getElementById('signupForm').classList.add('active');
+      } else {
+        document.getElementById('signupForm').classList.remove('active');
+        document.getElementById('loginForm').classList.add('active');
+      }
     }
   </script>
 </body>
