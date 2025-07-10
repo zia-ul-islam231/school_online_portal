@@ -22,49 +22,48 @@
       border-radius: 12px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.2);
     }
-    h1, h2 { text-align: center; color: #00796b; }
-
+    h1, h2 {
+      text-align: center;
+      color: #00796b;
+    }
     input, select, textarea {
-      width: 100%; padding: 12px; margin: 10px 0 20px 0;
-      border: 1px solid #ccc; border-radius: 8px;
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
       background-color: #e0f2f1;
     }
-
     button {
       padding: 12px 20px;
       background-color: #00796b;
-      color: white; border: none; border-radius: 8px;
-      cursor: pointer; font-weight: 600;
-      transition: 0.3s ease;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
     }
-
-    button:hover { background-color: #004d40; }
-
-    .login-form, .signup-form, .dashboard { display: none; }
-    .active { display: block; }
-
+    button:hover {
+      background-color: #004d40;
+    }
+    .login-form, .dashboard {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
     .role-section {
       background: #ffffff;
       padding: 20px;
       border-radius: 10px;
       margin-bottom: 20px;
     }
-
-    .record-box {
+    .record-box, .announcement-box {
       background: #e0f2f1;
       border-left: 5px solid #00796b;
       padding: 10px;
       margin-bottom: 10px;
       border-radius: 5px;
-    }
-
-    .link-btn {
-      text-align: center;
-      margin-bottom: 10px;
-      color: #004d40;
-      cursor: pointer;
-      text-decoration: underline;
-      font-weight: bold;
     }
   </style>
 </head>
@@ -72,66 +71,56 @@
   <div class="container">
     <h1>Government Girls Higher Secondary School No.1 Mardan</h1>
 
-    <!-- Login Form -->
+    <!-- LOGIN FORM -->
     <div id="loginForm" class="login-form active">
       <h2>Login to Portal</h2>
-      <select id="loginRole">
+      <select id="role">
         <option value="student">Student</option>
         <option value="teacher">Teacher</option>
         <option value="principal">Principal</option>
         <option value="staff">Other Staff</option>
       </select>
-      <input type="text" id="loginId" placeholder="Enter your ID" />
-      <input type="password" id="loginPassword" placeholder="Enter your password" />
+      <input type="text" id="userId" placeholder="Enter your ID" />
+      <input type="password" id="password" placeholder="Enter your password" />
       <button onclick="login()">Login</button>
-      <div class="link-btn" onclick="toggleForms('signup')">Don't have an account? Sign up</div>
     </div>
 
-    <!-- Signup Form -->
-    <div id="signupForm" class="signup-form">
-      <h2>Sign Up</h2>
-      <select id="signupRole">
-        <option value="student">Student</option>
-        <option value="teacher">Teacher</option>
-        <option value="principal">Principal</option>
-        <option value="staff">Other Staff</option>
-      </select>
-      <input type="text" id="signupId" placeholder="Create your ID" />
-      <input type="password" id="signupPassword" placeholder="Create your password" />
-      <button onclick="signup()">Sign Up</button>
-      <div class="link-btn" onclick="toggleForms('login')">Already have an account? Login</div>
-    </div>
-
-    <!-- Dashboard -->
+    <!-- DASHBOARD -->
     <div id="dashboard" class="dashboard">
       <h2 id="dashboardTitle"></h2>
 
+      <!-- STUDENT -->
       <div id="studentSection" class="role-section">
         <h3>📘 Student Portal</h3>
-        <textarea placeholder="Write your feedback or idea..."></textarea>
-        <button onclick="alert('Idea Submitted!')">Submit</button>
+        <div id="studentResults"></div>
+        <h4>📣 Announcements:</h4>
+        <div id="studentAnnouncements"></div>
       </div>
 
+      <!-- TEACHER -->
       <div id="teacherSection" class="role-section">
         <h3>📚 Teacher Portal</h3>
-        <input type="text" id="studentName" placeholder="Student Name" />
-        <input type="text" id="studentSubject" placeholder="Subject (e.g. Math)" />
-        <input type="text" id="studentGrade" placeholder="Grade (e.g. A+)" />
-        <button onclick="uploadRecord()">Upload Record</button>
-        <h4>📄 Uploaded Student Records:</h4>
-        <div id="recordList"></div>
+        <textarea id="resultInput" placeholder="Enter student result..."></textarea>
+        <button onclick="uploadResult()">Upload Result</button>
+
+        <textarea id="teacherAnnouncement" placeholder="Write announcement for students or staff..."></textarea>
+        <button onclick="postAnnouncement('teacher')">Post Announcement</button>
       </div>
 
+      <!-- PRINCIPAL -->
       <div id="principalSection" class="role-section">
         <h3>📂 Principal Dashboard</h3>
-        <button onclick="alert('All records opened')">View Records</button>
-        <button onclick="alert('Announcement sent')">Send Announcement</button>
+        <button onclick="viewAllResults()">📄 View All Results</button>
+        <div id="allResultsBox"></div>
+        <textarea id="principalAnnouncement" placeholder="Write announcement to all..."></textarea>
+        <button onclick="postAnnouncement('principal')">Post Announcement</button>
       </div>
 
+      <!-- STAFF -->
       <div id="staffSection" class="role-section">
         <h3>🗂 Staff Portal</h3>
-        <textarea placeholder="Enter duty report..."></textarea>
-        <button onclick="alert('Report Submitted!')">Submit</button>
+        <h4>📣 Announcements:</h4>
+        <div id="staffAnnouncements"></div>
       </div>
 
       <button onclick="logout()">🔒 Logout</button>
@@ -139,48 +128,22 @@
   </div>
 
   <script>
-    // Simulated users storage
-    let users = JSON.parse(localStorage.getItem('schoolUsers')) || {
-      student: [],
-      teacher: [],
-      principal: [],
-      staff: []
+    const users = {
+      student: { id: 's1', password: 'student' },
+      teacher: { id: 't1', password: 'teacher' },
+      principal: { id: 'p1', password: 'principal' },
+      staff: { id: 'sf1', password: 'staff' }
     };
 
-    // Simulated teacher "file" to hold student records
-    let teacherRecords = JSON.parse(localStorage.getItem('teacherRecords')) || [];
-
-    function saveUsers() {
-      localStorage.setItem('schoolUsers', JSON.stringify(users));
-    }
-
-    function signup() {
-      const role = document.getElementById('signupRole').value;
-      const id = document.getElementById('signupId').value;
-      const pass = document.getElementById('signupPassword').value;
-
-      if (id && pass) {
-        const exists = users[role].some(user => user.id === id);
-        if (exists) {
-          alert('❌ User ID already exists!');
-          return;
-        }
-        users[role].push({ id, password: pass });
-        saveUsers();
-        alert('✅ Sign up successful! You can now login.');
-        toggleForms('login');
-      } else {
-        alert('Please fill all fields.');
-      }
-    }
+    let currentRole = "";
 
     function login() {
-      const role = document.getElementById('loginRole').value;
-      const id = document.getElementById('loginId').value;
-      const pass = document.getElementById('loginPassword').value;
+      const role = document.getElementById('role').value;
+      const id = document.getElementById('userId').value;
+      const pass = document.getElementById('password').value;
 
-      const valid = users[role].some(user => user.id === id && user.password === pass);
-      if (valid) {
+      if (users[role] && users[role].id === id && users[role].password === pass) {
+        currentRole = role;
         document.getElementById('loginForm').classList.remove('active');
         document.getElementById('dashboard').classList.add('active');
         document.getElementById('dashboardTitle').innerText = role.toUpperCase() + ' DASHBOARD';
@@ -190,65 +153,98 @@
         document.getElementById('principalSection').style.display = (role === 'principal') ? 'block' : 'none';
         document.getElementById('staffSection').style.display = (role === 'staff') ? 'block' : 'none';
 
-        if (role === 'teacher') {
-          displayRecords();
-        }
+        loadAnnouncements();
+        if (role === 'student') showStudentResults();
       } else {
         alert('❌ Invalid ID or Password');
       }
     }
 
     function logout() {
+      currentRole = "";
       document.getElementById('dashboard').classList.remove('active');
       document.getElementById('loginForm').classList.add('active');
-      document.getElementById('loginId').value = '';
-      document.getElementById('loginPassword').value = '';
+      document.getElementById('userId').value = '';
+      document.getElementById('password').value = '';
     }
 
-    function toggleForms(form) {
-      if (form === 'signup') {
-        document.getElementById('loginForm').classList.remove('active');
-        document.getElementById('signupForm').classList.add('active');
-      } else {
-        document.getElementById('signupForm').classList.remove('active');
-        document.getElementById('loginForm').classList.add('active');
-      }
-    }
-
-    function uploadRecord() {
-      const name = document.getElementById('studentName').value.trim();
-      const subject = document.getElementById('studentSubject').value.trim();
-      const grade = document.getElementById('studentGrade').value.trim();
-
-      if (name && subject && grade) {
-        const record = { name, subject, grade };
-        teacherRecords.push(record);
-        localStorage.setItem('teacherRecords', JSON.stringify(teacherRecords));
-        alert('✅ Record Uploaded!');
-        document.getElementById('studentName').value = '';
-        document.getElementById('studentSubject').value = '';
-        document.getElementById('studentGrade').value = '';
-        displayRecords();
-      } else {
-        alert('❌ Please fill all fields.');
-      }
-    }
-
-    function displayRecords() {
-      const container = document.getElementById('recordList');
-      container.innerHTML = '';
-      if (teacherRecords.length === 0) {
-        container.innerHTML = "<p>No records uploaded yet.</p>";
+    function uploadResult() {
+      const result = document.getElementById('resultInput').value.trim();
+      if (result === "") {
+        alert("⚠️ Enter result before uploading.");
         return;
       }
-      teacherRecords.forEach((rec) => {
-        const div = document.createElement('div');
-        div.className = 'record-box';
-        div.textContent = `👩‍🎓 ${rec.name} — ${rec.subject}: ${rec.grade}`;
-        container.appendChild(div);
+      let results = JSON.parse(localStorage.getItem("results") || "[]");
+      results.push(result);
+      localStorage.setItem("results", JSON.stringify(results));
+      alert("✅ Result Uploaded!");
+      document.getElementById('resultInput').value = '';
+    }
+
+    function showStudentResults() {
+      const results = JSON.parse(localStorage.getItem("results") || "[]");
+      const container = document.getElementById("studentResults");
+      container.innerHTML = "<h4>📄 Your Uploaded Results:</h4>";
+      if (results.length === 0) {
+        container.innerHTML += "<p>No results uploaded yet.</p>";
+      } else {
+        results.forEach(res => {
+          const div = document.createElement("div");
+          div.className = "record-box";
+          div.textContent = res;
+          container.appendChild(div);
+        });
+      }
+    }
+
+    function viewAllResults() {
+      const results = JSON.parse(localStorage.getItem("results") || "[]");
+      const box = document.getElementById("allResultsBox");
+      box.innerHTML = "<h4>📋 All Results:</h4>";
+      if (results.length === 0) {
+        box.innerHTML += "<p>No results uploaded yet.</p>";
+      } else {
+        results.forEach(res => {
+          const div = document.createElement("div");
+          div.className = "record-box";
+          div.textContent = res;
+          box.appendChild(div);
+        });
+      }
+    }
+
+    function postAnnouncement(role) {
+      let text = (role === "principal") ? document.getElementById("principalAnnouncement").value.trim() : document.getElementById("teacherAnnouncement").value.trim();
+      if (text === "") {
+        alert("⚠️ Write something to announce.");
+        return;
+      }
+      let announcements = JSON.parse(localStorage.getItem("announcements") || "[]");
+      announcements.push({ role: role, message: text });
+      localStorage.setItem("announcements", JSON.stringify(announcements));
+      alert("✅ Announcement Posted!");
+      document.getElementById(role + "Announcement").value = '';
+      loadAnnouncements();
+    }
+
+    function loadAnnouncements() {
+      const announcements = JSON.parse(localStorage.getItem("announcements") || "[]");
+      const targets = {
+        student: document.getElementById("studentAnnouncements"),
+        staff: document.getElementById("staffAnnouncements")
+      };
+
+      for (let key in targets) targets[key].innerHTML = "";
+      announcements.forEach(ann => {
+        const box = document.createElement("div");
+        box.className = "announcement-box";
+        box.innerHTML = `📢 <strong>${ann.role.toUpperCase()}:</strong> ${ann.message}`;
+        if (targets.student) targets.student.appendChild(box);
+        if (targets.staff && ann.role === "teacher" || ann.role === "principal") targets.staff.appendChild(box.cloneNode(true));
       });
     }
   </script>
 </body>
 </html>
+
 
