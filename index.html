@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>GGHSS Mardan Portal</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GGHSS Mardan School Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; }
     body {
@@ -23,41 +23,56 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.2);
     }
     h1, h2 { text-align: center; color: #00796b; }
-
     input, select, textarea {
-      width: 100%; padding: 12px; margin: 10px 0 20px 0;
-      border: 1px solid #ccc; border-radius: 8px;
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0 20px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
       background-color: #e0f2f1;
     }
-
     button {
       padding: 12px 20px;
       background-color: #00796b;
-      color: white; border: none; border-radius: 8px;
-      cursor: pointer; font-weight: 600;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
       transition: 0.3s ease;
     }
-
     button:hover { background-color: #004d40; }
-
     .login-form, .signup-form, .dashboard { display: none; }
     .active { display: block; }
-
     .role-section {
       background: #ffffff;
       padding: 20px;
       border-radius: 10px;
       margin-bottom: 20px;
     }
-
     .record-box, .announcement-box {
       background: #e0f2f1;
       border-left: 5px solid #00796b;
       padding: 10px;
       margin-bottom: 10px;
       border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-
+    .record-box button, .announcement-box button {
+      background: #c62828;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background-color 0.3s ease;
+    }
+    .record-box button:hover, .announcement-box button:hover {
+      background-color: #b71c1c;
+    }
     .link-btn {
       text-align: center;
       margin-bottom: 10px;
@@ -72,6 +87,7 @@
 <div class="container">
   <h1>GGHSS Mardan School Portal</h1>
 
+  <!-- Login Form -->
   <div id="loginForm" class="login-form active">
     <h2>Login</h2>
     <select id="loginRole">
@@ -86,6 +102,7 @@
     <div class="link-btn" onclick="toggleForms('signup')">No account? Sign Up</div>
   </div>
 
+  <!-- Signup Form -->
   <div id="signupForm" class="signup-form">
     <h2>Sign Up</h2>
     <select id="signupRole">
@@ -98,15 +115,18 @@
     <div class="link-btn" onclick="toggleForms('login')">Back to Login</div>
   </div>
 
+  <!-- Dashboard -->
   <div id="dashboard" class="dashboard">
     <h2 id="dashboardTitle"></h2>
 
+    <!-- Student Portal -->
     <div id="studentSection" class="role-section">
       <h3>Student Portal</h3>
       <h4>Announcements for Students:</h4>
       <div id="studentAnnouncements"></div>
     </div>
 
+    <!-- Teacher Portal -->
     <div id="teacherSection" class="role-section">
       <h3>Teacher Portal</h3>
       <input id="studentName" placeholder="Student Name" />
@@ -118,14 +138,26 @@
         <option value="staff">To Staff</option>
       </select>
       <button onclick="uploadRecord()">Upload Record</button>
-      <h4>Records:</h4>
+
+      <h4>Your Uploaded Records:</h4>
       <div id="recordList"></div>
 
       <h4>Manage Students</h4>
       <input id="deleteUserIdT" placeholder="Student ID to delete" />
       <button onclick="deleteUser(false)">Delete Student</button>
+
+      <h4>Your Announcements</h4>
+      <textarea id="teacherAnnText" placeholder="Write announcement..."></textarea>
+      <select id="teacherAnnTarget">
+        <option value="student">To Students</option>
+        <option value="principal">To Principal</option>
+        <option value="staff">To Staff</option>
+      </select>
+      <button onclick="postAnnouncement(false)">Send Announcement</button>
+      <div id="teacherAnnouncements"></div>
     </div>
 
+    <!-- Principal Portal -->
     <div id="principalSection" class="role-section">
       <h3>Principal Portal</h3>
       <textarea id="principalAnnText" placeholder="Write announcement..."></textarea>
@@ -133,6 +165,7 @@
         <option value="student">To Students</option>
         <option value="teacher">To Teachers</option>
         <option value="staff">To Staff</option>
+        <option value="principal">To Principals</option>
       </select>
       <button onclick="postAnnouncement(true)">Send Announcement</button>
 
@@ -145,8 +178,15 @@
         <option value="principal">Principal</option>
       </select>
       <button onclick="deleteUser(true)">Delete User</button>
+
+      <h4>View All Records</h4>
+      <div id="allRecordsList"></div>
+
+      <h4>All Announcements</h4>
+      <div id="allAnnouncementsList"></div>
     </div>
 
+    <!-- Staff Portal -->
     <div id="staffSection" class="role-section">
       <h3>Staff Portal</h3>
       <h4>Announcements for Staff:</h4>
@@ -158,114 +198,251 @@
 </div>
 
 <script>
+  // Data storage keys and variables
   let users = JSON.parse(localStorage.getItem('users')) || {
     student: [],
     teacher: [],
-    principal: [{ id: "adminPrincipal", password: "12345" }],
+    principal: [{ id: "adminPrincipal", password: "12345" }], // Default principal
     staff: []
   };
 
   let records = JSON.parse(localStorage.getItem('records')) || [];
   let announcements = JSON.parse(localStorage.getItem('announcements')) || [];
-  let currentRole = '', currentId = '';
 
+  let currentRole = '';
+  let currentId = '';
+
+  // Save all data to localStorage
   function saveAll() {
     localStorage.setItem('users', JSON.stringify(users));
     localStorage.setItem('records', JSON.stringify(records));
     localStorage.setItem('announcements', JSON.stringify(announcements));
   }
 
+  // Signup function (only for students and staff)
   function signup() {
     const role = document.getElementById('signupRole').value;
-    const id = document.getElementById('signupId').value;
-    const pass = document.getElementById('signupPassword').value;
-    if (!id || !pass) return alert('Fill all fields');
-    if (users[role].some(u => u.id === id)) return alert('ID exists');
+    const id = document.getElementById('signupId').value.trim();
+    const pass = document.getElementById('signupPassword').value.trim();
+
+    if (!id || !pass) {
+      alert('Please fill all fields!');
+      return;
+    }
+    if (users[role].some(u => u.id === id)) {
+      alert('User ID already exists!');
+      return;
+    }
     users[role].push({ id, password: pass });
-    saveAll(); alert('Signup successful'); toggleForms('login');
+    saveAll();
+    alert('Signup successful! You can now login.');
+    toggleForms('login');
   }
 
+  // Login function
   function login() {
     const role = document.getElementById('loginRole').value;
-    const id = document.getElementById('loginId').value;
-    const pass = document.getElementById('loginPassword').value;
+    const id = document.getElementById('loginId').value.trim();
+    const pass = document.getElementById('loginPassword').value.trim();
+
     if (users[role].some(u => u.id === id && u.password === pass)) {
-      currentRole = role; currentId = id;
+      currentRole = role;
+      currentId = id;
       document.getElementById('loginForm').classList.remove('active');
+      document.getElementById('signupForm').classList.remove('active');
       document.getElementById('dashboard').classList.add('active');
       document.getElementById('dashboardTitle').innerText = role.toUpperCase() + ' DASHBOARD';
       showSections(role);
       displayRecords();
       displayAnnouncements();
-    } else alert('Invalid credentials');
+      displayAllRecords();
+      displayAllAnnouncements();
+      displayTeacherAnnouncements();
+    } else {
+      alert('Invalid ID or password!');
+    }
   }
 
+  // Logout
   function logout() {
+    currentRole = '';
+    currentId = '';
     document.getElementById('dashboard').classList.remove('active');
     document.getElementById('loginForm').classList.add('active');
+    clearInputs();
   }
 
-  function toggleForms(f) {
-    document.getElementById('loginForm').classList.toggle('active', f === 'login');
-    document.getElementById('signupForm').classList.toggle('active', f === 'signup');
+  // Toggle forms login/signup
+  function toggleForms(form) {
+    if (form === 'signup') {
+      document.getElementById('loginForm').classList.remove('active');
+      document.getElementById('signupForm').classList.add('active');
+    } else {
+      document.getElementById('signupForm').classList.remove('active');
+      document.getElementById('loginForm').classList.add('active');
+    }
+    clearInputs();
   }
 
+  // Show only the section relevant to the current role
   function showSections(role) {
     ['student', 'teacher', 'principal', 'staff'].forEach(r => {
-      document.getElementById(r + 'Section').style.display = (role === r) ? 'block' : 'none';
+      document.getElementById(r + 'Section').style.display = (r === role) ? 'block' : 'none';
     });
   }
 
-  function uploadRecord() {
-    const name = document.getElementById('studentName').value;
-    const subject = document.getElementById('studentSubject').value;
-    const grade = document.getElementById('studentGrade').value;
-    const to = document.getElementById('recordAudience').value;
-    if (name && subject && grade && to) {
-      records.push({ name, subject, grade, to, by: currentId });
-      saveAll(); displayRecords(); alert('Record uploaded');
-    } else alert('Fill all fields');
+  // Clear all input fields on forms
+  function clearInputs() {
+    ['loginId','loginPassword','signupId','signupPassword','studentName','studentSubject','studentGrade','deleteUserIdT','deleteUserIdP','teacherAnnText','principalAnnText','deleteUserIdP','deleteUserIdT'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.value = '';
+    });
   }
 
+  // Upload a student record (teacher)
+  function uploadRecord() {
+    const name = document.getElementById('studentName').value.trim();
+    const subject = document.getElementById('studentSubject').value.trim();
+    const grade = document.getElementById('studentGrade').value.trim();
+    const to = document.getElementById('recordAudience').value;
+
+    if (!name || !subject || !grade) {
+      alert('Please fill all record fields!');
+      return;
+    }
+
+    records.push({ name, subject, grade, to, by: currentId });
+    saveAll();
+    alert('Record uploaded!');
+    clearInputs();
+    displayRecords();
+  }
+
+  // Display records uploaded by the logged-in teacher
   function displayRecords() {
     const list = document.getElementById('recordList');
-    const filtered = records.filter(r => r.by === currentId);
-    list.innerHTML = filtered.map((r, i) => `<div class='record-box'>${r.name} - ${r.subject}: ${r.grade} ➜ ${r.to}</div>`).join('');
+    if (!list) return;
+
+    let filteredRecords = [];
+    if (currentRole === 'teacher') {
+      filteredRecords = records.filter(r => r.by === currentId);
+    } else if (currentRole === 'principal') {
+      filteredRecords = records;
+    }
+
+    if(filteredRecords.length === 0) {
+      list.innerHTML = '<p>No records found.</p>';
+      return;
+    }
+
+    list.innerHTML = filteredRecords.map((r, i) =>
+      `<div class="record-box">
+        ${r.name} - ${r.subject}: ${r.grade} (Shared to: ${capitalize(r.to)}) 
+        ${currentRole === 'teacher' ? `<button onclick="deleteRecord(${i})">Delete</button>` : ''}
+      </div>`
+    ).join('');
   }
 
-  function postAnnouncement(fromPrincipal = false) {
-    const text = fromPrincipal ? document.getElementById('principalAnnText').value : '';
-    const target = fromPrincipal ? document.getElementById('principalAnnTarget').value : '';
-    if (!text) return alert('Write something');
-    announcements.push({ text, to: target, by: currentId });
-    saveAll(); displayAnnouncements(); alert('Announcement sent');
+  // Delete record (only teacher who uploaded can delete)
+  function deleteRecord(index) {
+    const record = records[index];
+    if (record && record.by === currentId) {
+      records.splice(index, 1);
+      saveAll();
+      displayRecords();
+      alert('Record deleted!');
+    } else {
+      alert('You cannot delete this record!');
+    }
   }
 
-  function displayAnnouncements() {
-    const filtered = announcements.filter(a => a.to === currentRole);
-    const html = filtered.map((a, i) => {
-      let delBtn = (currentRole === 'principal') ? `<button onclick="deleteAnnouncement(${i})">❌</button>` : '';
-      return `<div class='announcement-box'>📢 ${a.text} ${delBtn}</div>`;
-    }).join('');
-    if (currentRole === 'student') document.getElementById('studentAnnouncements').innerHTML = html;
-    if (currentRole === 'staff') document.getElementById('staffAnnouncements').innerHTML = html;
-  }
+  // Post announcement (principal or teacher)
+  function postAnnouncement(isPrincipal) {
+    let text, target;
+    if (isPrincipal) {
+      text = document.getElementById('principalAnnText').value.trim();
+      target = document.getElementById('principalAnnTarget').value;
+    } else {
+      text = document.getElementById('teacherAnnText').value.trim();
+      target = document.getElementById('teacherAnnTarget').value;
+    }
 
-  function deleteAnnouncement(index) {
-    announcements.splice(index, 1);
-    saveAll(); displayAnnouncements();
-  }
+    if (!text) {
+      alert('Please write an announcement!');
+      return;
+    }
 
-  function deleteUser(fromPrincipal = false) {
-    const id = fromPrincipal ? document.getElementById('deleteUserIdP').value : document.getElementById('deleteUserIdT').value;
-    const role = fromPrincipal ? document.getElementById('deleteUserRoleP').value : 'student';
-    users[role] = users[role].filter(user => user.id !== id);
+    announcements.push({ text, to: target, by: currentId, fromPrincipal: isPrincipal });
     saveAll();
-    alert('User deleted successfully');
-  }
-</script>
-</body>
-</html>
 
+    alert('Announcement posted!');
+    if (isPrincipal) {
+      document.getElementById('principalAnnText').value = '';
+    } else {
+      document.getElementById('teacherAnnText').value = '';
+    }
+    displayAnnouncements();
+    displayAllAnnouncements();
+    displayTeacherAnnouncements();
+  }
+
+  // Display announcements relevant to current user role
+  function displayAnnouncements() {
+    if(currentRole === 'student') {
+      const studentAnn = announcements.filter(a => a.to === 'student');
+      const html = studentAnn.map((a, i) => `<div class="announcement-box">📢 ${a.text}</div>`).join('');
+      document.getElementById('studentAnnouncements').innerHTML = html || '<p>No announcements.</p>';
+    }
+    if(currentRole === 'staff') {
+      const staffAnn = announcements.filter(a => a.to === 'staff');
+      const html = staffAnn.map((a, i) => `<div class="announcement-box">📢 ${a.text}</div>`).join('');
+      document.getElementById('staffAnnouncements').innerHTML = html || '<p>No announcements.</p>';
+    }
+  }
+
+  // Display all announcements in principal portal with delete buttons
+  function displayAllAnnouncements() {
+    if(currentRole !== 'principal') return;
+    const container = document.getElementById('allAnnouncementsList');
+    if(!container) return;
+
+    if(announcements.length === 0) {
+      container.innerHTML = '<p>No announcements.</p>';
+      return;
+    }
+
+    container.innerHTML = announcements.map((a, i) => `
+      <div class="announcement-box">
+        📢 [To: ${capitalize(a.to)}] ${a.text}
+        <button onclick="deleteAnnouncement(${i})">Delete</button>
+      </div>
+    `).join('');
+  }
+
+  // Display teacher's own announcements with delete buttons
+  function displayTeacherAnnouncements() {
+    if(currentRole !== 'teacher') return;
+    const container = document.getElementById('teacherAnnouncements');
+    if(!container) return;
+
+    const myAnns = announcements.filter(a => a.by === currentId);
+    if(myAnns.length === 0) {
+      container.innerHTML = '<p>No announcements.</p>';
+      return;
+    }
+
+    container.innerHTML = myAnns.map((a, i) => `
+      <div class="announcement-box">
+        📢 [To: ${capitalize(a.to)}] ${a.text}
+        <button onclick="deleteAnnouncementByTeacher(${i})">Delete</button>
+      </div>
+    `).join('');
+  }
+
+  // Delete announcement (principal can delete any)
+  function deleteAnnouncement(index) {
+    if(currentRole !== 'principal') return alert('Permission denied');
+    announcements.splice(index, 1);
+    saveAll
 
 
