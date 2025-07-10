@@ -112,9 +112,18 @@
       <input id="studentName" placeholder="Student Name" />
       <input id="studentSubject" placeholder="Subject" />
       <input id="studentGrade" placeholder="Grade" />
+      <select id="recordAudience">
+        <option value="student">To Students</option>
+        <option value="principal">To Principal</option>
+        <option value="staff">To Staff</option>
+      </select>
       <button onclick="uploadRecord()">Upload Record</button>
       <h4>Records:</h4>
       <div id="recordList"></div>
+
+      <h4>Manage Students</h4>
+      <input id="deleteUserIdT" placeholder="Student ID to delete" />
+      <button onclick="deleteUser(false)">Delete Student</button>
     </div>
 
     <div id="principalSection" class="role-section">
@@ -205,15 +214,17 @@
     const name = document.getElementById('studentName').value;
     const subject = document.getElementById('studentSubject').value;
     const grade = document.getElementById('studentGrade').value;
-    if (name && subject && grade) {
-      records.push({ name, subject, grade });
+    const to = document.getElementById('recordAudience').value;
+    if (name && subject && grade && to) {
+      records.push({ name, subject, grade, to, by: currentId });
       saveAll(); displayRecords(); alert('Record uploaded');
     } else alert('Fill all fields');
   }
 
   function displayRecords() {
     const list = document.getElementById('recordList');
-    list.innerHTML = records.map(r => `<div class='record-box'>${r.name} - ${r.subject}: ${r.grade}</div>`).join('');
+    const filtered = records.filter(r => r.by === currentId);
+    list.innerHTML = filtered.map((r, i) => `<div class='record-box'>${r.name} - ${r.subject}: ${r.grade} ➜ ${r.to}</div>`).join('');
   }
 
   function postAnnouncement(fromPrincipal = false) {
@@ -240,8 +251,8 @@
   }
 
   function deleteUser(fromPrincipal = false) {
-    const id = fromPrincipal ? document.getElementById('deleteUserIdP').value : '';
-    const role = fromPrincipal ? document.getElementById('deleteUserRoleP').value : '';
+    const id = fromPrincipal ? document.getElementById('deleteUserIdP').value : document.getElementById('deleteUserIdT').value;
+    const role = fromPrincipal ? document.getElementById('deleteUserRoleP').value : 'student';
     users[role] = users[role].filter(user => user.id !== id);
     saveAll();
     alert('User deleted successfully');
