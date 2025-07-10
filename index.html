@@ -10,8 +10,7 @@
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
-      background: url('https://www.geo.tv/assets/uploads/updates/2020-11-12/318127_5012887_updates.jpg') no-repeat center center fixed;
-      background-size: cover;
+      background: #f0f4f8;
       color: #333;
     }
     .container {
@@ -22,36 +21,20 @@
       border-radius: 12px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.2);
     }
-    h1, h2 {
-      text-align: center;
-      color: #00796b;
-    }
+    h1, h2 { text-align: center; color: #00796b; }
     input, select, textarea {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0 20px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+      width: 100%; padding: 12px; margin: 10px 0 20px;
+      border: 1px solid #ccc; border-radius: 8px;
       background-color: #e0f2f1;
     }
     button {
-      padding: 12px 20px;
-      background-color: #00796b;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
+      padding: 12px 20px; background-color: #00796b;
+      color: white; border: none; border-radius: 8px;
+      cursor: pointer; font-weight: 600;
     }
     button:hover { background-color: #004d40; }
-    .login-form, .signup-form, .dashboard { display: none; }
+    .form-section { display: none; }
     .active { display: block; }
-    .role-section {
-      background: #ffffff;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
     .record-box, .announcement-box {
       background: #e0f2f1;
       border-left: 5px solid #00796b;
@@ -63,216 +46,139 @@
 </head>
 <body>
 <div class="container">
-  <h1>Government Girls Higher Secondary School No.1 Mardan</h1>
+  <h1>GGHSS Mardan Portal</h1>
 
-  <!-- LOGIN -->
-  <div id="loginForm" class="login-form active">
-    <h2>Login to Portal</h2>
+  <!-- Login -->
+  <div id="loginForm" class="form-section active">
+    <h2>Login</h2>
     <select id="loginRole">
       <option value="student">Student</option>
       <option value="teacher">Teacher</option>
       <option value="principal">Principal</option>
-      <option value="staff">Other Staff</option>
+      <option value="staff">Staff</option>
     </select>
-    <input type="text" id="loginUserId" placeholder="Enter your ID" />
-    <input type="password" id="loginPassword" placeholder="Enter your password" />
+    <input type="text" id="loginId" placeholder="Your ID">
+    <input type="password" id="loginPass" placeholder="Password">
     <button onclick="login()">Login</button>
-    <p style="text-align:center;margin-top:10px;">Don't have an account? <a href="#" onclick="showSignup()">Sign up</a></p>
+    <p>Don't have an account? <a href="#" onclick="switchForm('signupForm')">Signup here</a></p>
   </div>
 
-  <!-- SIGNUP -->
-  <div id="signupForm" class="signup-form">
-    <h2>Signup to Portal</h2>
+  <!-- Signup -->
+  <div id="signupForm" class="form-section">
+    <h2>Signup</h2>
     <select id="signupRole">
       <option value="student">Student</option>
+      <option value="teacher">Teacher</option>
       <option value="principal">Principal</option>
-      <option value="staff">Other Staff</option>
+      <option value="staff">Staff</option>
     </select>
-    <input type="text" id="signupUserId" placeholder="Create your ID" />
-    <input type="password" id="signupPassword" placeholder="Create your password" />
+    <input type="text" id="signupId" placeholder="Choose ID">
+    <input type="password" id="signupPass" placeholder="Choose Password">
     <button onclick="signup()">Signup</button>
-    <p style="text-align:center;margin-top:10px;">Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
+    <p>Already have an account? <a href="#" onclick="switchForm('loginForm')">Login here</a></p>
   </div>
 
-  <!-- DASHBOARD -->
-  <div id="dashboard" class="dashboard">
-    <h2 id="dashboardTitle"></h2>
+  <!-- Dashboard -->
+  <div id="dashboard" class="form-section">
+    <h2 id="roleTitle"></h2>
 
-    <div id="studentSection" class="role-section">
-      <h3>📘 Student Portal</h3>
-      <div id="studentResults"></div>
-      <h4>📣 Announcements:</h4>
-      <div id="studentAnnouncements"></div>
+    <div id="teacherSection" style="display:none">
+      <h3>Teacher Panel</h3>
+      <input id="studentName" placeholder="Student Name">
+      <input id="subject" placeholder="Subject">
+      <input id="marks" placeholder="Marks">
+      <button onclick="uploadRecord()">Upload Record</button>
+
+      <h4>Remove Student by ID</h4>
+      <input id="removeId" placeholder="Student ID to remove">
+      <button onclick="removeStudent()">Remove</button>
     </div>
 
-    <div id="teacherSection" class="role-section">
-      <h3>📚 Teacher Portal</h3>
-      <textarea id="resultInput" placeholder="Enter student result..."></textarea>
-      <button onclick="uploadResult()">Upload Result</button>
-      <textarea id="teacherAnnouncement" placeholder="Write announcement for students or staff..."></textarea>
-      <button onclick="postAnnouncement('teacher')">Post Announcement</button>
+    <div id="studentSection" style="display:none">
+      <h3>Student Records</h3>
+      <div id="studentRecords"></div>
     </div>
 
-    <div id="principalSection" class="role-section">
-      <h3>📂 Principal Dashboard</h3>
-      <button onclick="viewAllResults()">📄 View All Results</button>
-      <div id="allResultsBox"></div>
-      <textarea id="principalAnnouncement" placeholder="Write announcement to all..."></textarea>
-      <button onclick="postAnnouncement('principal')">Post Announcement</button>
-    </div>
-
-    <div id="staffSection" class="role-section">
-      <h3>🗂 Staff Portal</h3>
-      <h4>📣 Announcements:</h4>
-      <div id="staffAnnouncements"></div>
-    </div>
-
-    <button onclick="logout()">🔒 Logout</button>
+    <button onclick="logout()">Logout</button>
   </div>
 </div>
 
 <script>
-  let currentRole = "";
+  let currentUser = null;
 
-  function showSignup() {
-    document.getElementById('loginForm').classList.remove('active');
-    document.getElementById('signupForm').classList.add('active');
-  }
-
-  function showLogin() {
-    document.getElementById('signupForm').classList.remove('active');
-    document.getElementById('loginForm').classList.add('active');
+  function switchForm(formId) {
+    document.querySelectorAll('.form-section').forEach(div => div.classList.remove('active'));
+    document.getElementById(formId).classList.add('active');
   }
 
   function signup() {
     const role = document.getElementById('signupRole').value;
-    const id = document.getElementById('signupUserId').value.trim();
-    const pass = document.getElementById('signupPassword').value.trim();
-
-    if (!id || !pass) return alert("Please fill all fields.");
-
-    let users = JSON.parse(localStorage.getItem("users") || "{}");
-    if (users[id]) return alert("User ID already exists.");
-
+    const id = document.getElementById('signupId').value;
+    const pass = document.getElementById('signupPass').value;
+    let users = JSON.parse(localStorage.getItem('users') || '{}');
+    if (users[id]) return alert('ID already exists!');
     users[id] = { password: pass, role: role };
-    localStorage.setItem("users", JSON.stringify(users));
-    alert("Signup successful! Now login.");
-    showLogin();
+    localStorage.setItem('users', JSON.stringify(users));
+    alert('Signup successful!');
+    switchForm('loginForm');
   }
 
   function login() {
     const role = document.getElementById('loginRole').value;
-    const id = document.getElementById('loginUserId').value.trim();
-    const pass = document.getElementById('loginPassword').value.trim();
-
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-
-    // Default teacher account
-    if (role === "teacher" && id === "t1" && pass === "teacher") {
-      currentRole = role;
-    } else if (users[id] && users[id].password === pass && users[id].role === role) {
-      currentRole = role;
-    } else {
-      alert("❌ Invalid credentials.");
-      return;
-    }
-
-    document.getElementById('loginForm').classList.remove('active');
-    document.getElementById('dashboard').classList.add('active');
-    document.getElementById('dashboardTitle').innerText = role.toUpperCase() + ' DASHBOARD';
-
-    document.getElementById('studentSection').style.display = (role === 'student') ? 'block' : 'none';
+    const id = document.getElementById('loginId').value;
+    const pass = document.getElementById('loginPass').value;
+    let users = JSON.parse(localStorage.getItem('users') || '{}');
+    if (!users[id] || users[id].password !== pass || users[id].role !== role) return alert('Invalid credentials');
+    currentUser = { id, role };
+    document.getElementById('roleTitle').innerText = role.toUpperCase() + ' DASHBOARD';
+    switchForm('dashboard');
     document.getElementById('teacherSection').style.display = (role === 'teacher') ? 'block' : 'none';
-    document.getElementById('principalSection').style.display = (role === 'principal') ? 'block' : 'none';
-    document.getElementById('staffSection').style.display = (role === 'staff') ? 'block' : 'none';
-
-    loadAnnouncements();
-    if (role === 'student') showStudentResults();
+    document.getElementById('studentSection').style.display = (role === 'student') ? 'block' : 'none';
+    if (role === 'student') loadStudentRecords();
   }
 
   function logout() {
-    currentRole = "";
-    document.getElementById('dashboard').classList.remove('active');
-    document.getElementById('loginForm').classList.add('active');
-    document.getElementById('loginUserId').value = '';
-    document.getElementById('loginPassword').value = '';
+    currentUser = null;
+    switchForm('loginForm');
   }
 
-  function uploadResult() {
-    const result = document.getElementById('resultInput').value.trim();
-    if (result === "") return alert("⚠️ Enter result before uploading.");
-
-    let results = JSON.parse(localStorage.getItem("results") || "[]");
-    results.push(result);
-    localStorage.setItem("results", JSON.stringify(results));
-    alert("✅ Result Uploaded!");
-    document.getElementById('resultInput').value = '';
+  function uploadRecord() {
+    const name = document.getElementById('studentName').value;
+    const subject = document.getElementById('subject').value;
+    const marks = document.getElementById('marks').value;
+    if (!name || !subject || !marks) return alert('Fill all fields');
+    let records = JSON.parse(localStorage.getItem('records') || '[]');
+    records.push({ name, subject, marks });
+    localStorage.setItem('records', JSON.stringify(records));
+    alert('Record uploaded');
+    document.getElementById('studentName').value = '';
+    document.getElementById('subject').value = '';
+    document.getElementById('marks').value = '';
   }
 
-  function showStudentResults() {
-    const results = JSON.parse(localStorage.getItem("results") || "[]");
-    const container = document.getElementById("studentResults");
-    container.innerHTML = "<h4>📄 Your Uploaded Results:</h4>";
-    if (results.length === 0) {
-      container.innerHTML += "<p>No results uploaded yet.</p>";
-    } else {
-      results.forEach(res => {
-        const div = document.createElement("div");
-        div.className = "record-box";
-        div.textContent = res;
-        container.appendChild(div);
-      });
-    }
-  }
-
-  function viewAllResults() {
-    const results = JSON.parse(localStorage.getItem("results") || "[]");
-    const box = document.getElementById("allResultsBox");
-    box.innerHTML = "<h4>📋 All Results:</h4>";
-    if (results.length === 0) {
-      box.innerHTML += "<p>No results uploaded yet.</p>";
-    } else {
-      results.forEach(res => {
-        const div = document.createElement("div");
-        div.className = "record-box";
-        div.textContent = res;
-        box.appendChild(div);
-      });
-    }
-  }
-
-  function postAnnouncement(role) {
-    const text = role === "principal"
-      ? document.getElementById("principalAnnouncement").value.trim()
-      : document.getElementById("teacherAnnouncement").value.trim();
-
-    if (text === "") return alert("⚠️ Write something to announce.");
-
-    let announcements = JSON.parse(localStorage.getItem("announcements") || "[]");
-    announcements.push({ role: role, message: text });
-    localStorage.setItem("announcements", JSON.stringify(announcements));
-    alert("✅ Announcement Posted!");
-    if (role === "teacher") document.getElementById("teacherAnnouncement").value = '';
-    if (role === "principal") document.getElementById("principalAnnouncement").value = '';
-    loadAnnouncements();
-  }
-
-  function loadAnnouncements() {
-    const announcements = JSON.parse(localStorage.getItem("announcements") || "[]");
-
-    const studentContainer = document.getElementById("studentAnnouncements");
-    const staffContainer = document.getElementById("staffAnnouncements");
-
-    studentContainer.innerHTML = "";
-    staffContainer.innerHTML = "";
-
-    announcements.forEach(ann => {
-      const div = document.createElement("div");
-      div.className = "announcement-box";
-      div.innerHTML = `📢 <strong>${ann.role.toUpperCase()}:</strong> ${ann.message}`;
-      studentContainer.appendChild(div.cloneNode(true));
-      staffContainer.appendChild(div);
+  function loadStudentRecords() {
+    const records = JSON.parse(localStorage.getItem('records') || '[]');
+    const container = document.getElementById('studentRecords');
+    container.innerHTML = '';
+    records.forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'record-box';
+      div.innerText = `Name: ${r.name}, Subject: ${r.subject}, Marks: ${r.marks}`;
+      container.appendChild(div);
     });
+  }
+
+  function removeStudent() {
+    const id = document.getElementById('removeId').value;
+    let users = JSON.parse(localStorage.getItem('users') || '{}');
+    if (users[id] && users[id].role === 'student') {
+      delete users[id];
+      localStorage.setItem('users', JSON.stringify(users));
+      alert('Student removed');
+    } else {
+      alert('Student ID not found');
+    }
+    document.getElementById('removeId').value = '';
   }
 </script>
 </body>
