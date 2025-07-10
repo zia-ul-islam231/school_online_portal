@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>GGHSS Mardan Portal</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
@@ -23,11 +23,13 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.2);
     }
     h1, h2 { text-align: center; color: #00796b; }
+
     input, select, textarea {
       width: 100%; padding: 12px; margin: 10px 0 20px 0;
       border: 1px solid #ccc; border-radius: 8px;
       background-color: #e0f2f1;
     }
+
     button {
       padding: 12px 20px;
       background-color: #00796b;
@@ -35,15 +37,19 @@
       cursor: pointer; font-weight: 600;
       transition: 0.3s ease;
     }
+
     button:hover { background-color: #004d40; }
+
     .login-form, .signup-form, .dashboard { display: none; }
     .active { display: block; }
+
     .role-section {
       background: #ffffff;
       padding: 20px;
       border-radius: 10px;
       margin-bottom: 20px;
     }
+
     .record-box {
       background: #e0f2f1;
       border-left: 5px solid #00796b;
@@ -51,6 +57,7 @@
       margin-bottom: 10px;
       border-radius: 5px;
     }
+
     .link-btn {
       text-align: center;
       margin-bottom: 10px;
@@ -64,80 +71,184 @@
 <body>
   <div class="container">
     <h1>Government Girls Higher Secondary School No.1 Mardan</h1>
+
+    <!-- Login Form -->
     <div id="loginForm" class="login-form active">
       <h2>Login to Portal</h2>
       <select id="loginRole">
         <option value="student">Student</option>
         <option value="teacher">Teacher</option>
         <option value="principal">Principal</option>
-        <option value="staff">Staff</option>
+        <option value="staff">Other Staff</option>
       </select>
       <input type="text" id="loginId" placeholder="Enter your ID" />
       <input type="password" id="loginPassword" placeholder="Enter your password" />
       <button onclick="login()">Login</button>
       <div class="link-btn" onclick="toggleForms('signup')">Don't have an account? Sign up</div>
     </div>
+
+    <!-- Signup Form -->
     <div id="signupForm" class="signup-form">
       <h2>Sign Up</h2>
       <select id="signupRole">
         <option value="student">Student</option>
         <option value="teacher">Teacher</option>
         <option value="principal">Principal</option>
-        <option value="staff">Staff</option>
+        <option value="staff">Other Staff</option>
       </select>
       <input type="text" id="signupId" placeholder="Create your ID" />
       <input type="password" id="signupPassword" placeholder="Create your password" />
       <button onclick="signup()">Sign Up</button>
       <div class="link-btn" onclick="toggleForms('login')">Already have an account? Login</div>
     </div>
+
+    <!-- Dashboard -->
     <div id="dashboard" class="dashboard">
       <h2 id="dashboardTitle"></h2>
+
       <div id="studentSection" class="role-section">
-        <h3>📚 Student Portal</h3>
-        <div id="studentRecordView"></div>
-        <div id="studentAnnouncements"></div>
+        <h3>📘 Student Portal</h3>
+        <textarea placeholder="Write your feedback or idea..."></textarea>
+        <button onclick="alert('Idea Submitted!')">Submit</button>
       </div>
+
       <div id="teacherSection" class="role-section">
         <h3>📚 Teacher Portal</h3>
         <input type="text" id="studentName" placeholder="Student Name" />
-        <input type="text" id="studentSubject" placeholder="Subject" />
-        <input type="text" id="studentGrade" placeholder="Grade" />
-        <select id="recordTarget">
-          <option value="student">To Student</option>
-          <option value="staff">To Staff</option>
-          <option value="principal">To Principal</option>
-        </select>
+        <input type="text" id="studentSubject" placeholder="Subject (e.g. Math)" />
+        <input type="text" id="studentGrade" placeholder="Grade (e.g. A+)" />
         <button onclick="uploadRecord()">Upload Record</button>
-        <h4>Uploaded Records</h4>
+        <h4>📄 Uploaded Student Records:</h4>
         <div id="recordList"></div>
-        <h4>Delete Student</h4>
-        <input type="text" id="deleteStudentId" placeholder="Student ID to delete" />
-        <button onclick="deleteStudent()">Delete Student</button>
       </div>
+
       <div id="principalSection" class="role-section">
         <h3>📂 Principal Dashboard</h3>
-        <textarea id="announcementText" placeholder="Write announcement..."></textarea>
-        <button onclick="postAnnouncement()">Post Announcement</button>
-        <h4>Delete User</h4>
-        <input type="text" id="deleteUserId" placeholder="User ID" />
-        <select id="deleteUserRole">
-          <option value="student">Student</option>
-          <option value="teacher">Teacher</option>
-          <option value="staff">Staff</option>
-        </select>
-        <button onclick="deleteUser()">Delete</button>
+        <button onclick="alert('All records opened')">View Records</button>
+        <button onclick="alert('Announcement sent')">Send Announcement</button>
       </div>
+
       <div id="staffSection" class="role-section">
-        <h3>📂 Staff Portal</h3>
-        <div id="staffAnnouncements"></div>
+        <h3>🗂 Staff Portal</h3>
+        <textarea placeholder="Enter duty report..."></textarea>
+        <button onclick="alert('Report Submitted!')">Submit</button>
       </div>
-      <button onclick="logout()">🔐 Logout</button>
+
+      <button onclick="logout()">🔒 Logout</button>
     </div>
   </div>
+
   <script>
-    // JavaScript will be added in next update
+    // Simulated users storage
+    let users = JSON.parse(localStorage.getItem('schoolUsers')) || {
+      student: [],
+      teacher: [],
+      principal: [],
+      staff: []
+    };
+
+    // Simulated teacher "file" to hold student records
+    let teacherRecords = JSON.parse(localStorage.getItem('teacherRecords')) || [];
+
+    function saveUsers() {
+      localStorage.setItem('schoolUsers', JSON.stringify(users));
+    }
+
+    function signup() {
+      const role = document.getElementById('signupRole').value;
+      const id = document.getElementById('signupId').value;
+      const pass = document.getElementById('signupPassword').value;
+
+      if (id && pass) {
+        const exists = users[role].some(user => user.id === id);
+        if (exists) {
+          alert('❌ User ID already exists!');
+          return;
+        }
+        users[role].push({ id, password: pass });
+        saveUsers();
+        alert('✅ Sign up successful! You can now login.');
+        toggleForms('login');
+      } else {
+        alert('Please fill all fields.');
+      }
+    }
+
+    function login() {
+      const role = document.getElementById('loginRole').value;
+      const id = document.getElementById('loginId').value;
+      const pass = document.getElementById('loginPassword').value;
+
+      const valid = users[role].some(user => user.id === id && user.password === pass);
+      if (valid) {
+        document.getElementById('loginForm').classList.remove('active');
+        document.getElementById('dashboard').classList.add('active');
+        document.getElementById('dashboardTitle').innerText = role.toUpperCase() + ' DASHBOARD';
+
+        document.getElementById('studentSection').style.display = (role === 'student') ? 'block' : 'none';
+        document.getElementById('teacherSection').style.display = (role === 'teacher') ? 'block' : 'none';
+        document.getElementById('principalSection').style.display = (role === 'principal') ? 'block' : 'none';
+        document.getElementById('staffSection').style.display = (role === 'staff') ? 'block' : 'none';
+
+        if (role === 'teacher') {
+          displayRecords();
+        }
+      } else {
+        alert('❌ Invalid ID or Password');
+      }
+    }
+
+    function logout() {
+      document.getElementById('dashboard').classList.remove('active');
+      document.getElementById('loginForm').classList.add('active');
+      document.getElementById('loginId').value = '';
+      document.getElementById('loginPassword').value = '';
+    }
+
+    function toggleForms(form) {
+      if (form === 'signup') {
+        document.getElementById('loginForm').classList.remove('active');
+        document.getElementById('signupForm').classList.add('active');
+      } else {
+        document.getElementById('signupForm').classList.remove('active');
+        document.getElementById('loginForm').classList.add('active');
+      }
+    }
+
+    function uploadRecord() {
+      const name = document.getElementById('studentName').value.trim();
+      const subject = document.getElementById('studentSubject').value.trim();
+      const grade = document.getElementById('studentGrade').value.trim();
+
+      if (name && subject && grade) {
+        const record = { name, subject, grade };
+        teacherRecords.push(record);
+        localStorage.setItem('teacherRecords', JSON.stringify(teacherRecords));
+        alert('✅ Record Uploaded!');
+        document.getElementById('studentName').value = '';
+        document.getElementById('studentSubject').value = '';
+        document.getElementById('studentGrade').value = '';
+        displayRecords();
+      } else {
+        alert('❌ Please fill all fields.');
+      }
+    }
+
+    function displayRecords() {
+      const container = document.getElementById('recordList');
+      container.innerHTML = '';
+      if (teacherRecords.length === 0) {
+        container.innerHTML = "<p>No records uploaded yet.</p>";
+        return;
+      }
+      teacherRecords.forEach((rec) => {
+        const div = document.createElement('div');
+        div.className = 'record-box';
+        div.textContent = `👩‍🎓 ${rec.name} — ${rec.subject}: ${rec.grade}`;
+        container.appendChild(div);
+      });
+    }
   </script>
 </body>
 </html>
-
 
